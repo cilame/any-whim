@@ -1,0 +1,23 @@
+{
+    "cmd": ["tcc", "${file}", "-o", "${file_path}/${file_base_name}.exe"],
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "working_dir": "${file_path}",
+    "encoding":"cp936",
+    "shell":true,
+    "variants":
+    [
+        {
+            "name": "tcc Run",
+            "cmd": ["cmd", "/c", "tcc", "${file}", "-o", "${file_path}/${file_base_name}.exe", "&&","${file_path}/${file_base_name}.exe"]
+        },
+        {
+            "name": "tcc Make dll",
+            "cmd": ["cmd", "/c", "tcc", "-shared", "${file}", "-o", "${file_path}/${file_base_name}.dll"]
+        },
+        {
+            "name": "tcc Run dll",
+            "cmd": ["cmd", "/c", "tcc", "-shared", "${file}", "-o", "${file_path}/${file_base_name}.dll", "&&",
+                    "regsvr32.exe", "/s", "${file_path}/${file_base_name}.dll"]
+        },
+    ]
+}

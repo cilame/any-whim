@@ -1,0 +1,14 @@
+{
+    "cmd": ["tcc", "${file}", "-o", "${file_path}/${file_base_name}.exe"],
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "working_dir": "${file_path}",
+    "encoding":"cp936",
+    "shell":true,
+    "variants":
+    [
+        {
+            "name": "Run",
+            "cmd": ["cmd", "/c", "tcc", "${file}", "-o", "${file_path}/${file_base_name}.exe", "&&","${file_path}/${file_base_name}.exe"]
+        },
+    ]
+}

@@ -1,0 +1,5 @@
+{
+    "shell": true,
+    "encoding": "utf8",
+    "cmd": ["node", "$file"],
+}

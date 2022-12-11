@@ -1,0 +1,125 @@
+
+1 设置淘宝npm镜像
+    npm config set registry https://registry.npm.taobao.org
+
+2 根据nodejs安装地址设置nodejs的模块缓存空间
+    npm config set cache "D:\nodejs\node_cache"
+
+3 根据nodejs安装地址设置nodejs的模块全局空间，同时将该空间地址放到环境变量，以便提供命令行工具
+    npm config set prefix "D:\nodejs\node_global"
+
+4 初始化项目
+        初始化时，所有参数都可以一路默认，也可以按需要填写。建议新手全部默认即可。
+        项目会生成 package.json 文件，需要注意，这些包后续在 npm 安装库的时候
+        会自动修改 dependencies 字段进行安装库版本信息的记录，以后可能会需要这个开发包放到线上进行部署使用
+    npm init
+
+5 在项目下面安装自己需要的模块例如vue，react等，各种开发框架
+        项目会生成 package-lock.json 文件，保留了一些非常当前开发使用的各种依赖版本的信息
+    npm install vue
+    npm install react
+
+6 安装打包模块（非常重要）
+        webpack，可以将一系列模块化开发的 js文件打包成一个文件，方便后期被人导入使用
+        webpack-cli 如果 webpack 版本大于3，则还需要全局安装一下webpack-cli，否则会出问题
+        webpack-dev-server 用于快速开发，开启类似所见即所得的快速服务，让你能够快速调试页面
+    npm install webpack -g
+    npm install webpack-cli -g 
+    npm install webpack-dev-server -g
+    // 这里额外再加一些需要常用并考虑的库
+    npm install style-loader
+    npm install css-loader
+    npm install babel-loader
+    npm install @babel/core
+    npm install @babel/cli
+    npm install @babel/preset-env
+    npm install @babel/preset-react // react jsx特别需要的规则
+    npm install uglifyjs-webpack-plugin
+    npm install html-webpack-plugin
+        直接执行 webpack 命令
+        该工具库会在项目路径下会根据项目路径下的 src 文件夹下的 index.js 文件进行打包
+        打包地址为项目文件夹下的 dist 文件夹内的 main.js 文件
+        也可以在项目路径下面增加 webpack.config.js 文件进行打包的配置，文件内容可以如下进行修改
+    const path = require('path')
+    const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+    const HtmlWebPackPlugin = require('html-webpack-plugin')
+    module.exports = {
+        resolve: {
+            extensions: [
+                '.wasm', 
+                '.mjs',
+                '.js',
+                '.jsx',
+                '.json'
+            ]
+        },
+        entry: path.resolve(__dirname, 'src/index.jsx'),
+        module: {
+            rules:[
+                {
+                    test: /\.css$/,
+                    use: [
+                        'style-loader',
+                        'css-loader',
+                    ]
+                },
+                {
+                    test: /\.jsx?$/,
+                    exclude: /node_modules/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                require.resolve('@babel/preset-react'),
+                                [require.resolve('@babel/preset-env',{modules:false})],
+                            ],
+                            cacheDirectory: true,
+                        },
+                    }
+                },
+            ]
+        },
+        plugins: [
+            new HtmlWebPackPlugin({
+                template: path.resolve(__dirname, 'src/index.html'),
+                filename: 'index.html',
+            }),
+            new UglifyJSPlugin(), // 更强的代码压缩
+        ],
+    }
+
+6.1 高低版本转换
+    npm install @babel/core
+    npm install @babel/cli
+    npm install @babel/preset-env
+    .\node_modules\.bin\babel test.js --presets=@babel/preset-env
+    支持两种 babel 配置方式
+    1 直接在 package.json 中的 babel 字段里面设置
+        "babel": {
+            "presets": ["@babel/preset-env"]
+        }
+    2 在 package.json 文件路径下写一个 .babelrc 文件里面写入，该选项为最优先
+        {
+            "presets": ["@babel/preset-env"]
+        }
+    3 在 webpack.config.js 里面配置 rules，在 rules里面配置默认配置方式
+        module: {
+            rules:[
+                {
+                    test: /\.jsx?$/,
+                    exclude: /node_modules/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                require.resolve('@babel/preset-react'),
+                                [require.resolve('@babel/preset-env',{modules:false})],
+                            ],
+                            cacheDirectory: true,
+                        },
+                    }
+                },
+            ]
+        },
