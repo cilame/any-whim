@@ -5,12 +5,13 @@ import requests
 import random
 
 interface = 'http://127.0.0.1:18089'
+interface = 'http://8.130.11.250:18089'
 
 def get_random_str(num):
     ls = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     return ''.join([random.choice(ls) for i in range(num)])
 
-import vthread
+# import vthread
 # @vthread.pool(10)
 def run():
     url = interface + '/run_script'

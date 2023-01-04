@@ -4,10 +4,13 @@ import pprint
 import requests
 import random
 
-import vthread
+interface = 'http://127.0.0.1:18089'
+interface = 'http://8.130.11.250:18089'
+
+# import vthread
 # @vthread.pool(10)
 def run(only_info=False):
-    url = 'http://127.0.0.1:18089/run_script'
+    url = interface + '/run_script'
     data = {
         "scripts": ["var some = 333", "some + 333"],
         "only_script": True,

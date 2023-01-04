@@ -6,8 +6,8 @@ import random
 
 interface = 'http://127.0.0.1:18089'
 
-import vthread
-@vthread.pool(10)
+# import vthread
+# @vthread.pool(10)
 def run(only_info=False):
     url = interface + '/run_script'
     data = {
