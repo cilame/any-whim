@@ -47,7 +47,6 @@ import requests
 import random
 
 interface = 'http://127.0.0.1:18089'
-# interface = 'http://8.130.11.250:18089'
 
 config_url = interface + '/config'
 run_script_url = interface + '/run_script'
