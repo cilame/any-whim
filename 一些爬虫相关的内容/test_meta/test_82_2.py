@@ -70,15 +70,14 @@ def stable_init(win_index=0):
     }).json()
     print('clear_script', s)
 
-def init(win_index=0):
-    # 本地请求页面
-    u1 = 'https://www.jiaoyimao.com/'
-    t1 = requests.get(u1).text
+def init(win_index=0, info=None):
+    if not info:
+        raise 'no info'
     # 配置请求主页的缓存，因为滑块主页是动态变化的。
     s = requests.post(config_url, data= { 
         'win_index': win_index,
-        'match_url': u1,
-        'value': t1,
+        'match_url': info["url"],
+        'value': info["body"],
     }).json()
     # 配置第二个动态变化的资源
     t = ''.join([random.choice('0123456789ABCDEF') for i in range(50)])
@@ -199,8 +198,19 @@ def run(win_index=0):
         if 'error' in s:
             print(s['error'])
 
-# 一个 win_index 代表一个浏览器
-stable_init() # 对一个浏览器配置持久缓存
-init() # 动态配置缓存，并请求该页面。
-for i in range(2):
+# 配置持久缓存，执行一次即可。
+# 只要服务器不重启，这里就无需执行。
+stable_init() 
+
+
+# 本地请求页面，获取到滑块页面传递给配置函数
+url = 'https://www.jiaoyimao.com/'
+html = requests.get(url).text
+
+
+# 配置动态缓存，并虚拟请求该页面。
+init(info={"body":html, "url":url}) 
+# 对该页面虚拟滑动两次，滑动接口在函数内。
+# 通常前两次滑动才有效超过两次基本就不能过了，就需要冲洗请求滑块页面。
+for i in range(2): 
     run()
