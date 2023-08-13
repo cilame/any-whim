@@ -20,6 +20,67 @@ Array.prototype.random_sort = function(){
     return this
 }
 
+function hoist_var(path){
+    if (path.node.kind !== 'var' || 
+        t.isForOfStatement(path.parentPath.node) || 
+        t.isForInStatement(path.parentPath.node)){
+        return
+    }
+    var root = (path.getFunctionParent() || path.findParent(function(e){return t.isProgram(e)})).node
+    var vars = root.vars = root.vars || []
+    var node = path.node
+    var keep = []
+    function add_vars(node){
+        if (t.isIdentifier(node)){
+            if (vars.indexOf(node.name) == -1){
+                vars.push(node.name)
+            }
+        }else if (t.isArrayPattern(node)){
+            var eles = node.elements
+            for (var j = 0; j < eles.length; j++) {
+                add_vars(eles[j])
+            }
+        }else if (t.isRestElement(node)){
+            add_vars(node.argument)
+        }else if (t.isObjectPattern(node)){
+            var props = node.properties
+            for (var j = 0; j < props.length; j++) {
+                add_vars(props[j].value)
+            }
+        }else if (node == null){
+            return
+        }else{
+            throw Error('unknown decl type.' + node && node.type)
+        }
+    }
+    for (var i = 0; i < node.declarations.length; i++) {
+        if (node.declarations[i].init){
+            keep.push(t.ExpressionStatement(t.AssignmentExpression('=', node.declarations[i].id, node.declarations[i].init)))
+        }
+        add_vars(node.declarations[i].id)
+    }
+    if (keep.length){
+        path.replaceWithMultiple(keep)
+    }else{
+        path.remove()
+    }
+}
+function add_hoist_var(path){
+    var node = path.node
+    var vars = node.vars
+    if (vars && vars.length){
+        if(!node.body){
+            throw Error('no body.')
+        }
+        var body = Array.isArray(node.body) ? node.body : node.body.body
+        var _vars = []
+        for (var i = 0; i < vars.length; i++) {
+            _vars.push(t.VariableDeclarator(t.Identifier(vars[i])))
+        }
+        body.unshift(t.VariableDeclaration('var', _vars))
+    }
+}
+
 function v_ctl_flow(path){
     var _body = path.node.body.body
     var _indx = Array(_body.length)
@@ -48,6 +109,9 @@ function v_ctl_flow(path){
 
 function multi_process_ob(jscode){
     var ast = parser.parse(jscode)
+    traverse(ast, {'VariableDeclaration': hoist_var})
+    traverse(ast, {'Function|Program': add_hoist_var})
+    traverse(ast, {'VariableDeclaration': add_hoist_var})
     traverse(ast, {'FunctionDeclaration|FunctionExpression': v_ctl_flow})
     return generator(ast).code
 }
